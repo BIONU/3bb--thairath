@@ -157,48 +157,6 @@
             transform: scale(1.05);
         }
         
-        /* Channel Selector */
-        .channel-selector {
-            position: absolute;
-            bottom: 50px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.85);
-            padding: 10px;
-            border-radius: 8px;
-            z-index: 100;
-            display: none;
-            flex-wrap: wrap;
-            gap: 5px;
-            max-width: 200px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .channel-selector.show {
-            display: flex;
-        }
-        
-        .channel-btn {
-            background: rgba(30, 30, 30, 0.9);
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.65rem;
-            transition: all 0.3s ease;
-            flex: 1;
-            min-width: 60px;
-        }
-        
-        .channel-btn:hover {
-            background: rgba(229, 9, 20, 0.8);
-        }
-        
-        .channel-btn.active {
-            background: rgba(229, 9, 20, 0.9);
-        }
-        
         /* Info Panel */
         .info-panel {
             position: absolute;
@@ -263,19 +221,6 @@
                 padding: 6px 10px;
                 font-size: 0.65rem;
             }
-            
-            .channel-selector {
-                bottom: 45px;
-                left: 5px;
-                padding: 8px;
-                max-width: 180px;
-            }
-            
-            .channel-btn {
-                padding: 5px 8px;
-                font-size: 0.6rem;
-                min-width: 50px;
-            }
         }
         
         @media (max-width: 480px) {
@@ -332,7 +277,7 @@
         <div class="player-container">
             <iframe 
                 id="axn-frame"
-                src="https://dookeela2.live/live-tv/truemoviehits"
+                src="https://dookeela2.live/live-tv/axn"
                 allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                 allowfullscreen
                 scrolling="no"
@@ -350,35 +295,21 @@
             <!-- Error Message -->
             <div class="error-message" id="errorMessage">
                 <div style="margin-bottom: 8px;">⚠️ โหลดไม่สำเร็จ</div>
-                <div style="font-size: 0.7rem;">กรุณาลองใหม่หรือเปลี่ยนช่อง</div>
+                <div style="font-size: 0.7rem;">กรุณาลองใหม่หรือรีเฟรชหน้าเว็บ</div>
             </div>
             
             <!-- Controls -->
             <div class="ott-controls" id="ottControls">
                 <button class="control-btn" id="btn-reload">🔄</button>
-                <button class="control-btn" id="btn-channels">📺</button>
                 <button class="control-btn" id="btn-info">ℹ️</button>
                 <button class="control-btn" id="btn-fullscreen">⛶</button>
-            </div>
-            
-            <!-- Channel Selector -->
-            <div class="channel-selector" id="channelSelector">
-                <button class="channel-btn active" data-channel="axn">AXN</button>
-                <button class="channel-btn" data-channel="fox">FOX</button>
-                <button class="channel-btn" data-channel="fox-thai">FOX Thai</button>
-                <button class="channel-btn" data-channel="hbo">HBO</button>
-                <button class="channel-btn" data-channel="cinemax">Cinemax</button>
-                <button class="channel-btn" data-channel="tvn">TVN</button>
-                <button class="channel-btn" data-channel="warner">Warner</button>
-                <button class="channel-btn" data-channel="sony">Sony</button>
             </div>
             
             <!-- Info Panel -->
             <div class="info-panel" id="infoPanel">
                 <button class="close-info" id="closeInfo">×</button>
-                <div class="info-title">คำแนะนำการใช้งาน</div>
+                <div class="info-title">คำแนะนำการใช้งาน AXN Live</div>
                 <div class="info-text">🔄 โหลดใหม่</div>
-                <div class="info-text">📺 เปลี่ยนช่อง</div>
                 <div class="info-text">⛶ เต็มจอ</div>
                 <div class="info-text">ℹ️ แสดงข้อมูล</div>
                 <div class="info-text" style="margin-top: 10px; font-size: 0.7rem; color: #ccc;">
@@ -395,22 +326,9 @@
             const status = document.getElementById('status');
             const errorMessage = document.getElementById('errorMessage');
             const ottControls = document.getElementById('ottControls');
-            const channelSelector = document.getElementById('channelSelector');
             const infoPanel = document.getElementById('infoPanel');
             
             let controlsTimeout;
-            
-            // รายการช่องทีวีสำหรับ OTT Navigator
-            const channels = {
-                'axn': 'https://dookeela2.live/live-tv/axn',
-                'fox': 'https://dookeela2.live/live-tv/fox', 
-                'fox-thai': 'https://dookeela2.live/live-tv/fox-thai',
-                'hbo': 'https://dookeela2.live/live-tv/hbo',
-                'cinemax': 'https://dookeela2.live/live-tv/cinemax',
-                'tvn': 'https://dookeela2.live/live-tv/tvn',
-                'warner': 'https://dookeela2.live/live-tv/warner-tv',
-                'sony': 'https://dookeela2.live/live-tv/sony'
-            };
             
             // อัพเดทสถานะ
             function updateStatus(message) {
@@ -434,39 +352,6 @@
                 controlsTimeout = setTimeout(() => {
                     ottControls.classList.remove('show');
                 }, 3000);
-            }
-            
-            // เปลี่ยนช่อง
-            function changeChannel(channelId) {
-                if (channels[channelId]) {
-                    showLoading();
-                    updateStatus('กำลังเปลี่ยนช่อง...');
-                    hideError();
-                    
-                    // อัพเดทปุ่มที่ active
-                    document.querySelectorAll('.channel-btn').forEach(btn => {
-                        btn.classList.remove('active');
-                        if (btn.dataset.channel === channelId) {
-                            btn.classList.add('active');
-                        }
-                    });
-                    
-                    // อัพเดท header
-                    document.querySelector('.ott-header h1').textContent = channelId.toUpperCase() + ' LIVE TV';
-                    
-                    // เปลี่ยนช่อง
-                    frame.src = channels[channelId];
-                    
-                    // ซ่อน channel selector
-                    channelSelector.classList.remove('show');
-                    
-                    // ซ่อน loading หลังจากโหลดเสร็จ
-                    setTimeout(() => {
-                        hideLoading();
-                        updateStatus('พร้อมรับชม');
-                        showControlsTemporary();
-                    }, 4000);
-                }
             }
             
             // โหลดใหม่
@@ -510,16 +395,6 @@
                 showControlsTemporary();
             }
             
-            // Toggle channel selector
-            function toggleChannelSelector() {
-                if (channelSelector.classList.contains('show')) {
-                    channelSelector.classList.remove('show');
-                } else {
-                    channelSelector.classList.add('show');
-                    showControlsTemporary();
-                }
-            }
-            
             // Toggle info panel
             function toggleInfoPanel() {
                 if (infoPanel.classList.contains('show')) {
@@ -533,17 +408,9 @@
             // Event Listeners สำหรับ OTT Navigator
             document.getElementById('btn-reload').addEventListener('click', reloadChannel);
             document.getElementById('btn-fullscreen').addEventListener('click', enterFullscreen);
-            document.getElementById('btn-channels').addEventListener('click', toggleChannelSelector);
             document.getElementById('btn-info').addEventListener('click', toggleInfoPanel);
             document.getElementById('closeInfo').addEventListener('click', function() {
                 infoPanel.classList.remove('show');
-            });
-            
-            // เปลี่ยนช่องเมื่อคลิกปุ่ม
-            document.querySelectorAll('.channel-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    changeChannel(this.dataset.channel);
-                });
             });
             
             // เมื่อ iframe โหลดเสร็จ
@@ -582,30 +449,15 @@
                     case 'F':
                         enterFullscreen();
                         break;
-                    case 'c':
-                    case 'C':
-                        toggleChannelSelector();
-                        break;
                     case 'i':
                     case 'I':
                         toggleInfoPanel();
                         break;
                     case 'Escape':
-                        if (channelSelector.classList.contains('show')) {
-                            channelSelector.classList.remove('show');
-                        }
                         if (infoPanel.classList.contains('show')) {
                             infoPanel.classList.remove('show');
                         }
                         break;
-                    case '1': changeChannel('axn'); break;
-                    case '2': changeChannel('fox'); break;
-                    case '3': changeChannel('fox-thai'); break;
-                    case '4': changeChannel('hbo'); break;
-                    case '5': changeChannel('cinemax'); break;
-                    case '6': changeChannel('tvn'); break;
-                    case '7': changeChannel('warner'); break;
-                    case '8': changeChannel('sony'); break;
                 }
             });
             
