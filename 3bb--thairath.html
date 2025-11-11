@@ -2,8 +2,18 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live | DOOKEELA</title>
+    <title>NUTV 3BB - Full Screen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" type="text/css" href="/clap.css">
+    <script src="//cdn.jsdelivr.net/npm/@clappr/player@0.4.0/dist/clappr.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/mux.js@5.6.7/dist/mux.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/level-selector@latest/dist/level-selector.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/clappr-chromecast-plugin@latest/dist/clappr-chromecast-plugin.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/clappr-pip@latest/dist/clappr-pip.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/clappr-playback-rate-plugin@latest/dist/clappr-playback-rate-plugin.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/shaka-player@2.5.10/dist/shaka-player.compiled.min.js"></script>
+    <script src="//cdn.jsdelivr.net/gh/clappr/dash-shaka-playback@latest/dist/dash-shaka-playback.external.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/cdnbye-shaka@latest"></script>
     <style>
         * {
             margin: 0;
@@ -12,463 +22,226 @@
         }
         
         body {
-            background: #000000;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
+            background-color: #000000;
+            font-family: Arial, sans-serif;
             overflow: hidden;
             height: 100vh;
+            width: 100vw;
         }
         
-        .container {
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* Header สำหรับ OTT Navigator */
-        .ott-header {
-            background: linear-gradient(135deg, #e50914 0%, #b2070f 100%);
-            padding: 8px 15px;
-            text-align: center;
+        #player-wrapper {
             position: relative;
-            z-index: 100;
+            width: 100%;
+            height: 100%;
         }
         
-        .ott-header h1 {
-            font-size: 1.2rem;
-            margin: 0;
+        #player {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .nutv-label {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 18px;
             font-weight: bold;
+            color: #ff0;
+            z-index: 1000;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
         }
         
-        .ott-header .channel-info {
-            font-size: 0.7rem;
-            opacity: 0.9;
-            margin-top: 2px;
-        }
-        
-        /* Player Container */
-        .player-container {
-            flex: 1;
-            width: 100%;
-            height: calc(100vh - 40px);
-            position: relative;
-            background: #000;
-        }
-        
-        #axn-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: #000;
-        }
-        
-        /* Loading Screen */
-        .loading {
+        .controls {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 50;
-        }
-        
-        .spinner {
-            border: 4px solid rgba(229, 9, 20, 0.3);
-            border-top: 4px solid #e50914;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .loading p {
-            color: #fff;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-        }
-        
-        .status {
-            color: #ccc;
-            font-size: 0.7rem;
-            text-align: center;
-            max-width: 80%;
-        }
-        
-        /* Error Message */
-        .error-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(220, 53, 69, 0.9);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            text-align: center;
-            z-index: 60;
-            display: none;
-            max-width: 80%;
-        }
-        
-        /* Controls สำหรับ OTT Navigator */
-        .ott-controls {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            z-index: 100;
-            display: flex;
-            gap: 8px;
+            gap: 10px;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.5s ease;
         }
         
-        .ott-controls.show {
+        .controls.show {
             opacity: 1;
         }
         
         .control-btn {
-            background: rgba(229, 9, 20, 0.85);
+            background-color: rgba(0, 0, 0, 0.7);
             color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
+            border: 1px solid #ff0;
+            padding: 8px 15px;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 0.7rem;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 14px;
+            transition: all 0.3s;
         }
         
         .control-btn:hover {
-            background: rgba(229, 9, 20, 1);
-            transform: scale(1.05);
+            background-color: rgba(255, 255, 0, 0.2);
         }
         
-        /* Info Panel */
-        .info-panel {
+        /* สไตล์สำหรับโหมดเต็มจอ */
+        .fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+        }
+        
+        /* เอฟเฟกต์โหลด */
+        .loading {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            z-index: 100;
-            display: none;
-            backdrop-filter: blur(15px);
-            border: 2px solid #e50914;
-            max-width: 80%;
+            color: white;
+            font-size: 18px;
+            z-index: 1001;
         }
         
-        .info-panel.show {
-            display: block;
+        .loading:after {
+            content: '...';
+            animation: dots 1.5s steps(5, end) infinite;
         }
         
-        .info-title {
-            color: #e50914;
-            font-size: 1rem;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-        
-        .info-text {
-            color: #fff;
-            font-size: 0.8rem;
-            line-height: 1.4;
-            margin-bottom: 8px;
-        }
-        
-        .close-info {
-            position: absolute;
-            top: 8px;
-            right: 12px;
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-        
-        /* OTT Navigator Optimizations */
-        @media (max-width: 768px) {
-            .ott-header {
-                padding: 6px 10px;
-            }
-            
-            .ott-header h1 {
-                font-size: 1rem;
-            }
-            
-            .ott-header .channel-info {
-                font-size: 0.6rem;
-            }
-            
-            .control-btn {
-                padding: 6px 10px;
-                font-size: 0.65rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .player-container {
-                height: calc(100vh - 35px);
-            }
-            
-            .ott-header {
-                padding: 5px 8px;
-            }
-            
-            .ott-header h1 {
-                font-size: 0.9rem;
-            }
-            
-            .ott-controls {
-                bottom: 5px;
-                right: 5px;
-            }
-            
-            .control-btn {
-                padding: 5px 8px;
-                font-size: 0.6rem;
-            }
-        }
-
-        /* Fullscreen support */
-        :-webkit-full-screen .ott-header {
-            display: none;
-        }
-        
-        :-moz-full-screen .ott-header {
-            display: none;
-        }
-        
-        :-ms-fullscreen .ott-header {
-            display: none;
-        }
-        
-        :fullscreen .ott-header {
-            display: none;
+        @keyframes dots {
+            0%, 20% { color: rgba(255,255,255,0); text-shadow: .25em 0 0 rgba(255,255,255,0), .5em 0 0 rgba(255,255,255,0); }
+            40% { color: white; text-shadow: .25em 0 0 rgba(255,255,255,0), .5em 0 0 rgba(255,255,255,0); }
+            60% { text-shadow: .25em 0 0 white, .5em 0 0 rgba(255,255,255,0); }
+            80%, 100% { text-shadow: .25em 0 0 white, .5em 0 0 white; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header สำหรับ OTT Navigator -->
-        <div class="ott-header">
-            <h1>AXN LIVE TV</h1>
-            <div class="channel-info">จาก dookeela2.live | OTT Navigator</div>
-        </div>
-        
-        <!-- Player Container -->
-        <div class="player-container">
-            <iframe 
-                id="axn-frame"
-                src="https://dookeela2.live/live-tv/truemoviehits"
-                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                allowfullscreen
-                scrolling="no"
-                frameborder="0"
-                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-            ></iframe>
-            
-            <!-- Loading Screen -->
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>กำลังโหลด Live...</p>
-                <div class="status" id="status">เหมาะสำหรับ OTT Navigator</div>
-            </div>
-            
-            <!-- Error Message -->
-            <div class="error-message" id="errorMessage">
-                <div style="margin-bottom: 8px;">⚠️ โหลดไม่สำเร็จ</div>
-                <div style="font-size: 0.7rem;">กรุณาลองใหม่หรือรีเฟรชหน้าเว็บ</div>
-            </div>
-            
-            <!-- Controls -->
-            <div class="ott-controls" id="ottControls">
-                <button class="control-btn" id="btn-reload">🔄</button>
-                <button class="control-btn" id="btn-info">ℹ️</button>
-                <button class="control-btn" id="btn-fullscreen">⛶</button>
-            </div>
-            
-            <!-- Info Panel -->
-            <div class="info-panel" id="infoPanel">
-                <button class="close-info" id="closeInfo">×</button>
-                <div class="info-title">คำแนะนำการใช้งาน AXN Live</div>
-                <div class="info-text">🔄 โหลดใหม่</div>
-                <div class="info-text">⛶ เต็มจอ</div>
-                <div class="info-text">ℹ️ แสดงข้อมูล</div>
-                <div class="info-text" style="margin-top: 10px; font-size: 0.7rem; color: #ccc;">
-                    เหมาะสำหรับ OTT Navigator
-                </div>
-            </div>
+    <div id="player-wrapper">
+        <div id="player"></div>
+        <div class="loading">กำลังโหลด NUTV</div>
+        <span class="nutv-label"><em>NUTV</em></span>
+        <div class="controls" id="screen-controls">
+            <button class="control-btn" id="fullscreen-btn">เต็มจอ</button>
+            <button class="control-btn" id="normal-screen-btn">จอปกติ</button>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const frame = document.getElementById('axn-frame');
-            const loading = document.getElementById('loading');
-            const status = document.getElementById('status');
-            const errorMessage = document.getElementById('errorMessage');
-            const ottControls = document.getElementById('ottControls');
-            const infoPanel = document.getElementById('infoPanel');
-            
-            let controlsTimeout;
-            
-            // อัพเดทสถานะ
-            function updateStatus(message) {
-                status.textContent = message;
-            }
-            
-            // ซ่อนการโหลด
-            function hideLoading() {
-                loading.style.display = 'none';
-            }
-            
-            // แสดงการโหลด
-            function showLoading() {
-                loading.style.display = 'flex';
-            }
-            
-            // แสดง controls ชั่วคราว
-            function showControlsTemporary() {
-                ottControls.classList.add('show');
-                clearTimeout(controlsTimeout);
-                controlsTimeout = setTimeout(() => {
-                    ottControls.classList.remove('show');
-                }, 3000);
-            }
-            
-            // โหลดใหม่
-            function reloadChannel() {
-                showLoading();
-                updateStatus('กำลังโหลดใหม่...');
-                hideError();
-                frame.src = frame.src;
-                
-                setTimeout(() => {
-                    hideLoading();
-                    updateStatus('โหลดใหม่สำเร็จ');
-                    showControlsTemporary();
-                }, 3000);
-            }
-            
-            // แสดง error
-            function showError() {
-                errorMessage.style.display = 'block';
-            }
-            
-            // ซ่อน error
-            function hideError() {
-                errorMessage.style.display = 'none';
-            }
-            
-            // เข้าโหมดเต็มหน้าจอ
-            function enterFullscreen() {
-                const element = document.documentElement;
-                
+        // ฟังก์ชันสำหรับสลับโหมดเต็มจอ
+        function toggleFullscreen(element) {
+            if (!document.fullscreenElement) {
                 if (element.requestFullscreen) {
-                    element.requestFullscreen().catch(() => {});
+                    element.requestFullscreen();
                 } else if (element.webkitRequestFullscreen) {
                     element.webkitRequestFullscreen();
-                } else if (element.mozRequestFullScreen) {
-                    element.mozRequestFullScreen();
                 } else if (element.msRequestFullscreen) {
                     element.msRequestFullscreen();
                 }
-                
-                showControlsTemporary();
-            }
-            
-            // Toggle info panel
-            function toggleInfoPanel() {
-                if (infoPanel.classList.contains('show')) {
-                    infoPanel.classList.remove('show');
-                } else {
-                    infoPanel.classList.add('show');
-                    showControlsTemporary();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
                 }
             }
+        }
+        
+        // แสดงปุ่มควบคุมชั่วคราว
+        function showControlsTemporarily() {
+            const controls = document.getElementById('screen-controls');
+            controls.classList.add('show');
             
-            // Event Listeners สำหรับ OTT Navigator
-            document.getElementById('btn-reload').addEventListener('click', reloadChannel);
-            document.getElementById('btn-fullscreen').addEventListener('click', enterFullscreen);
-            document.getElementById('btn-info').addEventListener('click', toggleInfoPanel);
-            document.getElementById('closeInfo').addEventListener('click', function() {
-                infoPanel.classList.remove('show');
-            });
-            
-            // เมื่อ iframe โหลดเสร็จ
-            frame.addEventListener('load', function() {
-                setTimeout(() => {
-                    hideLoading();
-                    updateStatus('พร้อมรับชมใน OTT Navigator');
-                    showControlsTemporary();
-                }, 3000);
-            });
-            
-            frame.addEventListener('error', function() {
-                hideLoading();
-                showError();
-                updateStatus('เกิดข้อผิดพลาด');
-            });
-            
-            // การควบคุมด้วยการคลิก (สำหรับ OTT Navigator)
-            document.addEventListener('click', function(e) {
-                // คลิกที่พื้นหลังเพื่อแสดง controls
-                if (e.target === document.querySelector('.player-container') || 
-                    e.target === document.querySelector('.container') ||
-                    e.target === document.body) {
-                    showControlsTemporary();
-                }
-            });
-            
-            // การควบคุมด้วยคีย์บอร์ด (สำหรับ OTT Navigator)
-            document.addEventListener('keydown', function(e) {
-                switch(e.key) {
-                    case 'r':
-                    case 'R':
-                        reloadChannel();
-                        break;
-                    case 'f':
-                    case 'F':
-                        enterFullscreen();
-                        break;
-                    case 'i':
-                    case 'I':
-                        toggleInfoPanel();
-                        break;
-                    case 'Escape':
-                        if (infoPanel.classList.contains('show')) {
-                            infoPanel.classList.remove('show');
-                        }
-                        break;
-                }
-            });
-            
-            // แสดง controls เมื่อโหลดเสร็จ
+            // ซ่อนปุ่มหลังจาก 3 วินาที
             setTimeout(() => {
-                showControlsTemporary();
-            }, 5000);
-            
-            // อัพเดทสถานะสำหรับ OTT Navigator
-            updateStatus('กำลังเริ่มต้น... เหมาะสำหรับ OTT Navigator');
+                controls.classList.remove('show');
+            }, 3000);
+        }
+        
+        // สร้างตัวเล่นวิดีโอ
+        var player = new Clappr.Player({
+            source: 'https://npt-streamer3.cdn.3bbtv.com:8443/3bb/live/32/32.mpd',
+            mimeType: 'application/dash+xml',
+            height: '100%',
+            width: '100%',
+            autoPlay: true,
+            plugins: [LevelSelector, DashShakaPlayback, Clappr.MediaControl],
+            events: {
+                onReady: function() {
+                    // ซ่อนข้อความกำลังโหลด
+                    document.querySelector('.loading').style.display = 'none';
+                    
+                    // ปิดการคลิกเพื่อหยุดชั่วคราว
+                    var plugin = this.getPlugin('click_to_pause');
+                    plugin && plugin.disable();
+                    
+                    // แสดงปุ่มควบคุมชั่วคราวเมื่อโหลดเสร็จ
+                    showControlsTemporarily();
+                },
+                onError: function(e) {
+                    document.querySelector('.loading').textContent = 'เกิดข้อผิดพลาดในการโหลดวิดีโอ';
+                }
+            },
+            chromecast: {
+                preload: 'metadata',
+                contentType: 'video/mpd',
+            },
+            shakaConfiguration: {
+                drm: {
+                    clearKeys: {
+                        '4b2bff3e598043cfaf949305e3d153fa': '545df84ff4c54af6b5385516e0f65956'
+                    }
+                },
+            },
+            shakaOnBeforeLoad: function (shaka_player) {},
+            parentId: '#player'
         });
+        
+        // การจัดการปุ่มควบคุม
+        document.getElementById('fullscreen-btn').addEventListener('click', function() {
+            toggleFullscreen(document.getElementById('player-wrapper'));
+            showControlsTemporarily(); // แสดงปุ่มชั่วคราวอีกครั้ง
+        });
+        
+        document.getElementById('normal-screen-btn').addEventListener('click', function() {
+            if (document.fullscreenElement) {
+                toggleFullscreen(document.getElementById('player-wrapper'));
+                showControlsTemporarily(); // แสดงปุ่มชั่วคราวอีกครั้ง
+            }
+        });
+        
+        // ตรวจจับการเปลี่ยนแปลงโหมดเต็มจอ
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('msfullscreenchange', handleFullscreenChange);
+        
+        function handleFullscreenChange() {
+            if (document.fullscreenElement) {
+                document.getElementById('player-wrapper').classList.add('fullscreen');
+            } else {
+                document.getElementById('player-wrapper').classList.remove('fullscreen');
+            }
+        }
+        
+        // แสดงปุ่มควบคุมเมื่อเลื่อนเมาส์ใกล้ด้านล่าง
+        document.getElementById('player-wrapper').addEventListener('mousemove', function(e) {
+            const rect = this.getBoundingClientRect();
+            const mouseY = e.clientY - rect.top;
+            const height = rect.height;
+            
+            // ถ้าเมาส์อยู่ใกล้ด้านล่าง (ภายใน 100px)
+            if (height - mouseY < 100) {
+                showControlsTemporarily();
+            }
+        });
+        
+        // ฟังก์ชันสำหรับเปลี่ยนไปใช้ M3U8 หากมี URL
+        function switchToM3U8(m3u8Url) {
+            player.load(m3u8Url, 'application/x-mpegURL');
+        }
     </script>
 </body>
 </html>
